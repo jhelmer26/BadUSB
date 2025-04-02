@@ -1,21 +1,51 @@
 from crontab import CronTab
+import os
 
-user_cron = CronTab(user=True)
+# Create user-level crontab (no admin needed)
+cron = CronTab(user=True)
 
 # Prank 1: Say poop every 30 minutes
-poop = user_cron.new(command='say poop', comment='saypoop')
+poop = cron.new(command='say poop', comment='saypoop')
 poop.minute.every(30)
 
 # Prank 2: Open dog video every 6 hours
-dog = user_cron.new(command='open https://www.youtube.com/watch?v=taWzoLpdxaI', comment='dogthing')
+dog = cron.new(command='open https://www.youtube.com/watch?v=taWzoLpdxaI', comment='dogthing')
 dog.setall('0 */6 * * *')
 
-# Prank 3: Rickroll on reboot
-rick = user_cron.new(command='open https://www.youtube.com/watch?v=dQw4w9WgXcQ', comment='rickroll')
-rick.every_reboot()
-
-# Enable and write them all
-for job in [poop, dog, rick]:
+# Enable the cron jobs
+for job in [poop, dog]:
     job.enable()
+cron.write()
 
-user_cron.write()
+# Prank 3: Rickroll at login using LaunchAgent
+launch_agents_path = os.path.expanduser("~/Library/LaunchAgents")
+plist_path = os.path.join(launch_agents_path, "com.prank.rickroll.plist")
+
+# Ensure LaunchAgents directory exists
+os.makedirs(launch_agents_path, exist_ok=True)
+
+# Define the .plist contents
+plist_contents = """<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" 
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.prank.rickroll</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>open</string>
+        <string>https://www.youtube.com/watch?v=dQw4w9WgXcQ</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+</dict>
+</plist>
+"""
+
+# Write the plist file
+with open(plist_path, 'w') as f:
+    f.write(plist_contents)
+
+# Load the LaunchAgent
+os.system(f"launchctl load {plist_path}")
