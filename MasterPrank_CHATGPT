@@ -1,28 +1,21 @@
-
 from crontab import CronTab
 
 user_cron = CronTab(user=True)
-sys_cron = CronTab()
 
-# edit this line if you want a different command
-job = user_cron.new(command = 'say poop')
-job.minute.every(30)
+# Prank 1: Say poop every 30 minutes
+poop = user_cron.new(command='say poop', comment='saypoop')
+poop.minute.every(30)
 
-# sample pranks
+# Prank 2: Open dog video every 6 hours
+dog = user_cron.new(command='open https://www.youtube.com/watch?v=taWzoLpdxaI', comment='dogthing')
+dog.setall('0 */6 * * *')
 
-# every 30 minutes say poop
-# job = user_cron.new(command = 'say poop')
-# job.minute.every(30)
+# Prank 3: Rickroll on reboot
+rick = user_cron.new(command='open https://www.youtube.com/watch?v=dQw4w9WgXcQ', comment='rickroll')
+rick.every_reboot()
 
-# every 6 hours open dog thing YouTube video
-# job = user_cron.new(command = 'open https://www.youtube.com/watch?v=taWzoLpdxaI')
-# job.setall('6 */4 * * *');
+# Enable and write them all
+for job in [poop, dog, rick]:
+    job.enable()
 
-# every time the computer reboots, rick roll em
-# job = user_cron.new(command = 'open https://www.youtube.com/watch?v=dQw4w9WgXcQ')
-# job.every_reboot()
-
-
-job.enable()
-if job.is_valid():
-   user_cron.write()
+user_cron.write()
